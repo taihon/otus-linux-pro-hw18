@@ -1,0 +1,58 @@
+---
+- hosts: all
+  become: yes
+  become_method: sudo
+  tasks:
+    - name: Set MSK timezone
+      ansible.builtin.copy:
+        remote_src: true
+        src: /usr/share/zoneinfo/Europe/Moscow
+        dest: /etc/localtime
+    - name: Disable chronyd
+      ansible.builtin.systemd:
+        name: chronyd
+        state: stopped
+        enabled: false
+
+    - name: enable firewalld
+      ansible.builtin.systemd:
+        name: firewalld
+        enabled: true
+        state: reloaded
+    - name: create admin group
+      ansible.builtin.group:
+        name: admin
+        state: present
+    - name: create otusadm user
+      ansible.builtin.user:
+        name: otusadm
+        password: $6$Som3S@lt$6f/b8YcRFMc798oombhhfJ3JPoSlHxWYSLrM81jdGoll9m1fRVdiY2ztUT69FyybpLEGL90cCGZIuKe4Skhm4.
+
+    - name: create otus user
+      ansible.builtin.user:
+        name: otus
+        state: present
+        password: $6$Som3S@lt$6f/b8YcRFMc798oombhhfJ3JPoSlHxWYSLrM81jdGoll9m1fRVdiY2ztUT69FyybpLEGL90cCGZIuKe4Skhm4.
+    - name: add users to admin group
+      ansible.builtin.user:
+        name: "{{ item }}"
+        state: present
+        append: yes
+        groups: admin
+      with_items:
+        - otusadm
+        - vagrant
+        - root
+    - name: copy pamscript
+      ansible.builtin.copy:
+        src: files/pamscript.sh
+        dest: /usr/local/bin
+        mode: 0755
+    - name: enable check in pam.d/sshd
+      ansible.builtin.copy:
+        src: files/sshd
+        dest: /etc/pam.d/sshd
+        force: true
+    - name: tweak time
+      ansible.builtin.shell:
+        cmd: date -s '@1688190582'

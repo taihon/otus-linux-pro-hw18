@@ -9,3 +9,9 @@ https://docs.google.com/document/d/1lOFe3rv0QcnvOTNfQm0OMHbNQ0Cet6AR/edit?usp=sh
 2. (\*) Дать конкретному пользователю права работать с докером и возможность рестартить докер сервис.
 
 **_Решение_**
+
+Решено с использованием vagrant и ansible. Запускать командой vagrant up
+Для воспроизводимости тестирования - отключается chronyd, дата переводится на 01.07.2023 (суббота).
+
+Скриншот проверки pamscript.sh:
+![screenshot](./screen.png)
